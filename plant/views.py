@@ -149,6 +149,7 @@ class TestBase(APIView):
         
         upload_result = cloudinary.uploader.upload(request.data['link'])
         p = {}
+        print(upload_result)
         # p['Image'] = request.data['link']
         p['Image'] = upload_result['secure_url']
         pre = self.make_predict(filename=p['Image'])
