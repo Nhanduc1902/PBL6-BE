@@ -25,7 +25,7 @@ SECRET_KEY = '440ad32c-e286-4253-8682-9f070a9e82a6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["www.spring.doannhat2.click", "spring.doannhat2.click"]
 
 import cloudinary
 import cloudinary.uploader

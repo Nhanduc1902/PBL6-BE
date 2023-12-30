@@ -13,7 +13,7 @@ from django.conf import settings
 from tensorflow.keras.models import load_model
 import h5py
 import cloudinary.uploader
-
+import requests
 import numpy as np
 import cv2
 import urllib
@@ -50,38 +50,38 @@ class DiseasesDetail(APIView):
 
 
 class PredictList(APIView):
-    # def get(self, request, format=None):
-    #     #pre = Predict.objects.prefetch_related('diseases')
-    #     pre = Predict.objects.all()
-    #     #mydata = PredictSerializers(pre, many=True)
-    #     #return Response(mydata.data)
-    #     data = [f.to_json() for f in reversed(pre)]
-    #     return Response(data)
-    page_size = 10
+     def get(self, request, format=None):
+         #pre = Predict.objects.prefetch_related('diseases')
+         pre = Predict.objects.all()
+         #mydata = PredictSerializers(pre, many=True)
+         #return Response(mydata.data)
+         data = [f.to_json() for f in reversed(pre)]
+         return Response(data)
+#    page_size = 10
 
-    def get(self, request, format=None):
+#    def get(self, request, format=None):
         # Lấy giá trị của tham số 'page' từ query parameters của URL
-        page_number = request.GET.get("page", 1)
-        queryset = Predict.objects.all()
+#        page_number = request.GET.get("page", 1)
+#        queryset = Predict.objects.all()
 
         # Tạo một đối tượng Paginator từ django.core.paginator
-        paginator = Paginator(queryset, self.page_size)
+ #       paginator = Paginator(queryset, self.page_size)
 
-        try:
+ #      try:
             # Lấy trang hiện tại
-            page = paginator.page(page_number)
-        except PageNotAnInteger:
+#            page = paginator.page(page_number)
+ #       except PageNotAnInteger:
             # Nếu 'page' không phải là một số nguyên, trả về trang đầu tiên
-            page = paginator.page(1)
-        except EmptyPage:
+  #          page = paginator.page(1)
+   #     except EmptyPage:
             # Nếu 'page' lớn hơn tổng số trang, trả về trang cuối cùng
-            page = paginator.page(paginator.num_pages)
+    #        page = paginator.page(paginator.num_pages)
 
         # Serialize dữ liệu của trang hiện tại
-        serializer = Predict(page, many=True)
-        data = [f.to_json() for f in reversed(serializer)]
+  #      serializer = Predict(page, many=True)
+ #       data = [f.to_json() for f in reversed(serializer)]
         # Trả về response phân trang
-        return Response(data)
+ #       return Response(data)
 
 
 class PredictDetail(APIView):
@@ -110,26 +110,33 @@ class TestBase(APIView):
             'Tomato YellowLeaf Curl Virus', 'Tomato mosaic virus',
             'Tomato healthy']
         
-        
-        model = load_model('D:\PBL6\PBL6-main\my_model.h5')
+        print("truoc load model")
+        model = load_model('/home/danh/PBL6-BE/my_model.h5')
         # model = model.fit()
+        print("sau khi load model")
         probabilities = model.predict(np.asarray([image]))[0]
+        print(probabilities, "123")
         class_idx = np.argmax(probabilities)
         return [class_idx, probabilities[class_idx]]
         # return {classes[class_idx]: probabilities[class_idx]}
 
     def make_predict(self,filename):
         print ("make predict", filename)
-        # img = cv2.imread(filename)
-
+        #img = cv2.imread(filename)
+        print(filename)
         try:
             req = urllib.request.urlopen(filename)
+
+#           req = urlopen("http://vylagal.com/wp-content/uploads/2016/07/10.jpg")
+
             arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
+
             img = cv2.imdecode(arr, -1)
             IMAGE_SHAPE = (256, 256)
             img = cv2.resize(img, (IMAGE_SHAPE[0], IMAGE_SHAPE[1]) )
             img = img /255
             prediction = self.predict(image=img)
+            
             return prediction
             #res = {
             #    "class": list(prediction.keys())[0],
@@ -149,11 +156,11 @@ class TestBase(APIView):
         
         upload_result = cloudinary.uploader.upload(request.data['link'])
         p = {}
-        print(upload_result)
-        # p['Image'] = request.data['link']
+ 	# p['Image'] = request.data['link']
         p['Image'] = upload_result['secure_url']
         pre = self.make_predict(filename=p['Image'])
         p['PredictResult'] = int(pre[0]) + 1
+        print(int(pre[0])+1)
         p['Confident'] = pre[1]
         mydata = PredictSerializers(data = p)
         if mydata.is_valid():
